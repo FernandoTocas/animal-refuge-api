@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: psp-animal-refuge-postgres
+    environment:
+      POSTGRES_DB: animal_refuge_db
+      POSTGRES_USER: animal_user
+      POSTGRES_PASSWORD: animal_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - animal_refuge_postgres_data:/var/lib/postgresql/data
+      - ./init/data.sql:/docker-entrypoint-initdb.d/01-data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U animal_user -d animal_refuge_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  animal_refuge_postgres_data:
