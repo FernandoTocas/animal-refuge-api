@@ -1,9 +1,7 @@
 package com.fpsumma.psp.animalrefuge.controller;
 
-import java.lang.annotation.Repeatable;
 import java.util.List;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,15 +21,13 @@ import com.fpsumma.psp.animalrefuge.dto.response.PublicAnimalResponse;
 import com.fpsumma.psp.animalrefuge.service.AnimalService;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 @RestController
 public class AnimalController {
 
     private final AnimalService animalService;
-
-    public AnimalController(AnimalService animalService) {
-        this.animalService = animalService;
-    }
 
     @GetMapping("/api/health")
     public ResponseEntity<HealthResponse> health() {

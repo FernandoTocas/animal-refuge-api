@@ -14,12 +14,14 @@ import lombok.*;
 public class CarePlan {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String description;
     private String frequency;
-
+    
     @ManyToMany(mappedBy = "carePlans")
     private List<Animal> animals;
+
 }

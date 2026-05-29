@@ -1,0 +1,380 @@
+openapi: 3.0.3
+
+info:
+  title: Animal Refuge Exam API
+  version: 1.0.0
+  description: API mínima para gestionar animales, refugios y planes de cuidado en un refugio de animales.
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor local
+
+tags:
+  - name: Health
+    description: Comprobación del estado de la API
+  - name: Public Animals
+    description: Endpoints públicos de consulta de animales
+  - name: Animals
+    description: Gestión interna de animales
+
+paths:
+  /api/health:
+    get:
+      tags:
+        - Health
+      summary: Comprueba si la API está funcionando
+      operationId: checkHealth
+      responses:
+        '200':
+          description: API funcionando correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                ok:
+                  value:
+                    status: OK
+                    message: Animal Refuge API is running
+
+  /api/public/animals:
+    get:
+      tags:
+        - Public Animals
+      summary: Lista animales disponibles públicamente
+      operationId: listPublicAnimals
+      description: Devuelve únicamente animales con estado AVAILABLE. No debe incluir registeredBy ni planes de cuidado internos.
+      responses:
+        '200':
+          description: Lista pública de animales disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicAnimalResponse'
+              examples:
+                publicAnimals:
+                  value:
+                    - id: 1
+                      name: Luna
+                      species: Perro
+                      breed: Mestizo
+                      age: 3
+                      shelterCity: Madrid
+
+  /api/animals:
+    post:
+      tags:
+        - Animals
+      summary: Crea un nuevo animal
+      operationId: createAnimal
+      description: Crea un nuevo animal asociado a un refugio existente. El campo registeredBy debe obtenerse del usuario autenticado.
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnimalRequest'
+            examples:
+              createAnimal:
+                value:
+                  name: Luna
+                  species: Perro
+                  breed: Mestizo
+                  age: 3
+                  shelterId: 1
+      responses:
+        '201':
+          description: Animal creado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnimalResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autenticado
+        '404':
+          description: Refugio no encontrado
+        '409':
+          description: El refugio ha alcanzado su capacidad máxima
+
+  /api/animals/{id}:
+    get:
+      tags:
+        - Animals
+      summary: Obtiene el detalle privado de un animal
+      operationId: getAnimalById
+      description: Devuelve el detalle completo de un animal, incluyendo registeredBy, refugio y planes de cuidado.
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnimalId'
+      responses:
+        '200':
+          description: Animal encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnimalResponse'
+              examples:
+                animalDetail:
+                  value:
+                    id: 1
+                    name: Luna
+                    species: Perro
+                    breed: Mestizo
+                    age: 3
+                    status: AVAILABLE
+                    registeredBy: student
+                    arrivalDate: '2026-05-25T14:30:00'
+                    shelter:
+                      id: 1
+                      name: Refugio Huellas Felices
+                      city: Madrid
+                    carePlans:
+                      - id: 1
+                        name: Vacunación
+                        frequency: Anual
+        '401':
+          description: No autenticado
+        '404':
+          description: Animal no encontrado
+
+  /api/animals/{animalId}/care-plans/{carePlanId}:
+    post:
+      tags:
+        - Animals
+      summary: Asigna un plan de cuidado a un animal
+      operationId: assignCarePlanToAnimal
+      description: Asigna un CarePlan existente a un Animal existente usando la relación N:N.
+      security:
+        - basicAuth: []
+      parameters:
+        - name: animalId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+        - name: carePlanId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: Cuidado asignado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnimalResponse'
+        '401':
+          description: No autenticado
+        '404':
+          description: Animal o plan de cuidado no encontrado
+        '409':
+          description: El cuidado ya está asignado o el estado del animal no permite nuevos cuidados
+
+  /api/animals/{id}/status:
+    patch:
+      tags:
+        - Animals
+      summary: Actualiza el estado de un animal
+      operationId: updateAnimalStatus
+      description: Actualiza el estado de un animal aplicando las reglas de negocio indicadas en el enunciado.
+      security:
+        - basicAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnimalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnimalStatusRequest'
+            examples:
+              adoptAnimal:
+                value:
+                  status: ADOPTED
+              markUnderTreatment:
+                value:
+                  status: UNDER_TREATMENT
+      responses:
+        '200':
+          description: Estado actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnimalResponse'
+        '400':
+          description: Estado inválido
+        '401':
+          description: No autenticado
+        '404':
+          description: Animal no encontrado
+        '409':
+          description: Cambio de estado no permitido
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    AnimalId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 1
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: OK
+        message:
+          type: string
+          example: Animal Refuge API is running
+
+    CreateAnimalRequest:
+      type: object
+      required:
+        - name
+        - species
+        - age
+        - shelterId
+      properties:
+        name:
+          type: string
+          minLength: 2
+          example: Luna
+        species:
+          type: string
+          minLength: 2
+          example: Perro
+        breed:
+          type: string
+          example: Mestizo
+        age:
+          type: integer
+          minimum: 0
+          example: 3
+        shelterId:
+          type: integer
+          format: int64
+          example: 1
+
+    UpdateAnimalStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/AnimalStatus'
+
+    AnimalResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Luna
+        species:
+          type: string
+          example: Perro
+        breed:
+          type: string
+          example: Mestizo
+        age:
+          type: integer
+          example: 3
+        status:
+          $ref: '#/components/schemas/AnimalStatus'
+        registeredBy:
+          type: string
+          example: student
+        arrivalDate:
+          type: string
+          format: date-time
+          example: '2026-05-25T14:30:00'
+        shelter:
+          $ref: '#/components/schemas/ShelterSummaryResponse'
+        carePlans:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarePlanSummaryResponse'
+
+    PublicAnimalResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Luna
+        species:
+          type: string
+          example: Perro
+        breed:
+          type: string
+          example: Mestizo
+        age:
+          type: integer
+          example: 3
+        shelterCity:
+          type: string
+          example: Madrid
+
+    ShelterSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Refugio Huellas Felices
+        city:
+          type: string
+          example: Madrid
+
+    CarePlanSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Vacunación
+        frequency:
+          type: string
+          example: Anual
+
+    AnimalStatus:
+      type: string
+      enum:
+        - AVAILABLE
+        - UNDER_TREATMENT
+        - ADOPTED
+        - DECEASED

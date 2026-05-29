@@ -8,7 +8,6 @@ import com.fpsumma.psp.animalrefuge.dto.response.AnimalResponse;
 import com.fpsumma.psp.animalrefuge.dto.response.PublicAnimalResponse;
 
 public interface AnimalService {
-
     List<PublicAnimalResponse> listarAnimalesPublicos();
     AnimalResponse crearAnimal(CreateAnimalRequest request, String username);
     AnimalResponse buscarPorId(Long id);

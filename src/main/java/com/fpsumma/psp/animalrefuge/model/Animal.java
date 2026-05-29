@@ -5,6 +5,18 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.*;
+/*
+id
+name
+species
+breed
+age
+status
+arrivalDate
+registeredBy
+shelter
+carePlans
+*/
 
 @Getter
 @Setter
@@ -17,7 +29,7 @@ public class Animal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String name;
     private String species;
     private String breed;
@@ -27,9 +39,9 @@ public class Animal {
     private AnimalStatus status;
 
     @Column(name = "arrival_date")
-    private LocalDateTime  arrivalDate;
+    private LocalDateTime arrivalDate;
 
-    @Column(name = "registered_id")
+    @Column(name = "registered_by")
     private String registeredBy;
 
     @ManyToOne
@@ -38,9 +50,9 @@ public class Animal {
 
     @ManyToMany
     @JoinTable(
-        name = "animal_care_plans",
-        joinColumns =  @JoinColumn(name = "animal_id"),
-        inverseJoinColumns = @JoinColumn (name = "care_plan_id")
+        name = "animal_care_plan",
+        joinColumns = @JoinColumn(name = "animal_id"),
+        inverseJoinColumns = @JoinColumn(name = "care_plan_id")
     )
     private List<CarePlan> carePlans;
 }

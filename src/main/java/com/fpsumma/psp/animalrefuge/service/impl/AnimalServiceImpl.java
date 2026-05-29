@@ -15,11 +15,14 @@ import com.fpsumma.psp.animalrefuge.repository.AnimalRepository;
 import com.fpsumma.psp.animalrefuge.repository.CarePlanRepository;
 import com.fpsumma.psp.animalrefuge.repository.ShelterRepository;
 import com.fpsumma.psp.animalrefuge.service.AnimalService;
+import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class AnimalServiceImpl implements AnimalService {
 
@@ -27,16 +30,6 @@ public class AnimalServiceImpl implements AnimalService {
     private final ShelterRepository shelterRepository;
     private final CarePlanRepository carePlanRepository;
     private final AnimalMapper animalMapper;
-
-    public AnimalServiceImpl(AnimalRepository animalRepository,
-                             ShelterRepository shelterRepository,
-                             CarePlanRepository carePlanRepository,
-                             AnimalMapper animalMapper) {
-        this.animalRepository = animalRepository;
-        this.shelterRepository = shelterRepository;
-        this.carePlanRepository = carePlanRepository;
-        this.animalMapper = animalMapper;
-    }
 
     @Override
     public List<PublicAnimalResponse> listarAnimalesPublicos() {

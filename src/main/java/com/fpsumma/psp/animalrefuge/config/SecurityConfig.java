@@ -16,13 +16,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health").permitAll()
-                .requestMatchers("/api/public/animals").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults());
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // Endpoints públicos
+                        .requestMatchers("/api/health").permitAll()
+                        .requestMatchers("/api/public/animals").permitAll()
+
+                        // El resto requiere autenticación
+                        .anyRequest().authenticated()
+                )
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
@@ -30,14 +33,14 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails teacher = User.withUsername("teacher")
-            .password("{noop}teacher123")
-            .roles("TEACHER")
-            .build();
+                .password("{noop}teacher123")
+                .roles("TEACHER")
+                .build();
 
         UserDetails student = User.withUsername("student")
-            .password("{noop}student123")
-            .roles("STUDENT")
-            .build();
+                .password("{noop}student123")
+                .roles("STUDENT")
+                .build();
 
         return new InMemoryUserDetailsManager(teacher, student);
     }

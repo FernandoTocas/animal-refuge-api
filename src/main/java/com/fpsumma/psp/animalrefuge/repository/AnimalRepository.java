@@ -11,5 +11,5 @@ import com.fpsumma.psp.animalrefuge.model.AnimalStatus;
 @Repository
 public interface AnimalRepository extends JpaRepository <Animal, Long> {
     List<Animal> findByStatus (AnimalStatus status);
-    long countByShelterIdAndStatusNot(Long shelterId, AnimalStatus status);
+    long countByShelterIdAndStatusNot (Long shelterId, AnimalStatus status);
 }

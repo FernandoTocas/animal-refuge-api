@@ -1,16 +1,28 @@
 package com.fpsumma.psp.animalrefuge.model;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/*
 
+id
+name
+city
+capacity
+createdAt
+animals
+
+*/
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "shelters")
 public class Shelter {
@@ -23,10 +35,10 @@ public class Shelter {
     private String city;
     private Integer capacity;
 
-    @Column(name = "create_ad")
-    private String createdAt;
+    @Column(name = "create_at")
+    private LocalDateTime createdAt;
 
-    @OneToMany
+    @OneToMany(mappedBy = "shelter")
     private List<Animal> animals;
     
 }
